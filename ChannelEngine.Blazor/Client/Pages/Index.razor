@@ -1,0 +1,78 @@
+﻿@inject IAssessmentLogic logic;
+@page "/"
+
+<h1>Hello, world!</h1>
+Welcome to your new app.
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <h1>@errorMessage</h1>
+}
+<SurveyPrompt Title="How is Blazor working for you?" />
+@if (topResults == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<table>
+    <thead>
+        <tr>
+            <th>Product code</th>
+            <th>gtin</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    @foreach (var result in topResults)
+    {
+        <tr>
+            <td>@result.ProductName</td>
+            <td>@result.Gtin</td>
+            <td>@result.Quantity</td>
+            <td><button @onclick="async() => await Restock(result.ProductName)">Set stock to 25</button></td>
+        </tr>
+    }
+</table>
+<ul>
+    @if (restocked.Count > 0)
+    {
+        <p>Restocked items</p>
+        <ul>
+            @foreach (StockItem item in restocked)
+            {
+                <li>@item.MerchantProductNo</li>
+            }
+        </ul>
+    }
+</ul>
+}
+@code{
+    private IEnumerable<TopResultView> topResults;
+    private List<StockItem> restocked = new List<StockItem>();
+    string errorMessage = "";
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            topResults = await logic.RetreiveTop(5);
+        }
+        catch(Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task Restock(string productCode)
+    {
+        try
+        {
+            StockItem stockItem = await logic.GetStock(productCode);
+            stockItem.Stock = 25;
+            await logic.SetStock(stockItem);
+            restocked.Add(stockItem);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}
