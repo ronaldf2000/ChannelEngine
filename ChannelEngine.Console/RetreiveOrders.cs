@@ -32,6 +32,16 @@ namespace ChannelEngine.Console
             System.Console.WriteLine($"Top 5 results");
             foreach (TopResultView resultView in top5)
             {
+                if(resultView.ProductName == "001201-M")
+                {
+                    StockItem item = await _assessment.GetStock(resultView.ProductName);
+                    _logger.LogDebug($"Current stock: {item.MerchantProductNo}-{item.StockLocationId} is {item.Stock}");
+                    item.Stock = 25;
+                    await _assessment.SetStock(item);
+
+                    item = await _assessment.GetStock(resultView.ProductName);
+                    _logger.LogDebug($"New stock: {item.MerchantProductNo}-{item.StockLocationId} is {item.Stock}");
+                }
                 System.Console.WriteLine($"{resultView.Gtin}, {resultView.ProductName}, {resultView.Quantity}");
             }
 

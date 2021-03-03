@@ -5,6 +5,6 @@ namespace ChannelEngine.Core.Clients
 {
     public interface IOrderClient
     {
-        Task<OrderResponse> RetrieveOrders(int page, OrderStatus? status = null);
+        Task<ChannelResponse<Order>> RetrieveOrders(int page, OrderStatus? status = null);
     }
 }

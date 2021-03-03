@@ -1,4 +1,5 @@
 ﻿using ChannelEngine.Core.Models;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,33 +25,23 @@ namespace ChannelEngine.Core.Clients
         REQUIRES_CORRECTION
     }
 
-    public class OrderClient : IOrderClient
+    public class OrderClient : ChannelClient, IOrderClient
     {
-        private readonly HttpClient _client;
-        private readonly string _apiKey;
         private readonly ILogger<OrderClient> _logger;
-        public OrderClient(HttpClient client, IConfiguration configuration, ILogger<OrderClient> logger)
+        public OrderClient(HttpClient client, IConfiguration configuration, ILogger<OrderClient> logger) : base(client, configuration, logger)
         {
-            _client = client;
-            _apiKey = configuration["apiKey"];
             _logger = logger;
-            if (string.IsNullOrEmpty(_apiKey))
-            {
-                _logger.LogWarning("Error no api key in configuration using default dev api key");
-                _apiKey = "541b989ef78ccb1bad630ea5b85c6ebff9ca3322";
-            }
         }
 
         //for assesment no need to implement other filters
-        public async Task<OrderResponse> RetrieveOrders(int page, OrderStatus? status = null)
+        public async Task<ChannelResponse<Order>> RetrieveOrders(int page, OrderStatus? status = null)
         {
-            //https://api-dev.channelengine.net/api/v2/orders/?apikey=541b989ef78ccb1bad630ea5b85c6ebff9ca3322&status=IN_PROGRESS
-            string url = $"?apikey={_apiKey}";
+            var query = GetQueryParams();
             if (status != null)
             {
-                url += $"&status={status}";
+                query["status"] = status.ToString();
             }
-            return await _client.GetFromJsonAsync<OrderResponse>(url);
+            return await _client.GetFromJsonAsync<ChannelResponse<Order>>(QueryHelpers.AddQueryString("", query));
         }
     }
 }

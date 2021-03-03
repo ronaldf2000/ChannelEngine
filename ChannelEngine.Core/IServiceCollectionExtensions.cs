@@ -13,6 +13,7 @@ namespace ChannelEngine.Core
         public static IServiceCollection AddServices(this IServiceCollection services, string baseUrl)
         {
             services.AddHttpClient<IOrderClient, OrderClient>(cb => cb.BaseAddress = new Uri(baseUrl + "orders/"));
+            services.AddHttpClient<IStockClient, StockClient>(cb => cb.BaseAddress = new Uri(baseUrl));
             services.AddScoped<IAssessmentLogic, AssessmentLogic>();
             return services;
         }

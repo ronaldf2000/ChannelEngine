@@ -11,10 +11,10 @@ namespace ChannelEngine.Tests
 {
     public class TestOrderClient : IOrderClient
     {
-        public async Task<OrderResponse> RetrieveOrders(int page, OrderStatus? status = null)
+        public async Task<ChannelResponse> RetrieveOrders(int page, OrderStatus? status = null)
         {
             string testData = await File.ReadAllTextAsync("TestData.json");
-            return JsonConvert.DeserializeObject<OrderResponse>(testData);
+            return JsonConvert.DeserializeObject<ChannelResponse>(testData);
         }
     }
 }

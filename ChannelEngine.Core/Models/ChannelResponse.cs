@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ChannelEngine.Core.Models
 {
-    public class OrderResponse
+    public class ChannelResponse<T>
     {
-        public List<Content> Content { get; set; }
+        public List<T> Content { get; set; }
         public int Count { get; set; }
         public int TotalCount { get; set; }
         public int ItemsPerPage { get; set; }

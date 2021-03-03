@@ -12,11 +12,13 @@ namespace ChannelEngine.Core
     public class AssessmentLogic : IAssessmentLogic
     {
         private readonly IOrderClient _orderClient;
+        private readonly IStockClient _stockClient;
         private readonly ILogger<AssessmentLogic> _logger;
 
-        public AssessmentLogic(IOrderClient client, ILogger<AssessmentLogic> logger)
+        public AssessmentLogic(IOrderClient orderClient, IStockClient stockClient, ILogger<AssessmentLogic> logger)
         {
-            _orderClient = client;
+            _stockClient = stockClient;
+            _orderClient = orderClient;
             _logger = logger;
         }
 
@@ -27,7 +29,7 @@ namespace ChannelEngine.Core
             //var response = _orderClient.RetrieveOrders(1, OrderStatus.IN_PROGRESS);
             int page = 1;
             List<Line> lines = new List<Line>();
-            OrderResponse response;
+            ChannelResponse<Order> response;
             try
             {
                 do
@@ -44,7 +46,7 @@ namespace ChannelEngine.Core
                         {
                             _logger.LogDebug($"Total items {response.TotalCount} pages {response.TotalCount / response.ItemsPerPage + 1}");
                         }
-                        foreach (Content content in response.Content)
+                        foreach (Order content in response.Content)
                         {
                             lines.AddRange(content.Lines);
                         }
@@ -74,6 +76,19 @@ namespace ChannelEngine.Core
                 })
                 .OrderByDescending(rv => rv.Quantity)
                 .Take(top);
+        }
+
+        public async Task<StockItem> GetStock(string productCode)
+        {
+            ChannelResponse<StockLocation> stockLocation = await _stockClient.GetStockLocations();
+            StockLocation location = stockLocation?.Content.First();
+            var response =  await _stockClient.GetStock(productCode, location.Id);
+            return response?.Content?.First();
+        }
+
+        public async Task SetStock(StockItem item)
+        {
+            await _stockClient.SetStock(item);
         }
     }
 }
